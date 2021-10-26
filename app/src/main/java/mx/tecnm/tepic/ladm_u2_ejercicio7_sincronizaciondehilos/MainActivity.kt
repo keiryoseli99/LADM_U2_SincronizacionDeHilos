@@ -2,59 +2,45 @@ package mx.tecnm.tepic.ladm_u2_ejercicio7_sincronizaciondehilos
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 import java.lang.Exception
 
 class MainActivity : AppCompatActivity() {
+    val hilo1 = HiloJugador1(this)
+    val hilo2 = HiloJugador2(this)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        val hilo1 = HiloJugador1(this)
-        val hilo2 = HiloJugador2(this)
-        var r1 = 0
-        var r2 = 0
 
         button.setOnClickListener {
             try {
                 hilo1.start()
                 hilo2.start()
 
-                while (hilo1.partida == true && hilo2.partida == false) {
-                    hilo1.tiro1()
-                    hilo1.partida = false
-                    hilo2.partida = true
-                }
-                while (hilo1.partida == false && hilo2.partida == true) {
-                    hilo2.tiro1()
-                    hilo1.partida = true
-                    hilo2.partida = false
-                }
-                while (hilo1.partida == true && hilo2.partida == false) {
-                    hilo1.tiro2()
-                    hilo1.partida = false
-                    hilo2.partida = true
-                }
-                while (hilo1.partida == false && hilo2.partida == true) {
-                    hilo2.tiro2()
-                    hilo1.partida = true
-                    hilo2.partida = false
-                }
+                Join(1)
 
-                r1 = hilo1.dado1 + hilo1.dado2
-                r2 = hilo2.dado1 + hilo2.dado2
-
-                if (r1>r2){
-                    textView5.text = "EL GANADOR ES: Juegador1"
-                }else {
-                    textView5.text = "EL GANADOR ES: Juegador2"
+                if (hilo1.jugando == false) {
+                    if (hilo1.r1>hilo2.r2){
+                        textView5.text = "EL GANADOR ES: Juegador1"
+                    }
+                    if (hilo1.r1<hilo2.r2){
+                        textView5.text = "EL GANADOR ES: Juegador2"
+                    }
+                    if (hilo1.r1==hilo2.r2){
+                        textView5.text = "EMPATE!!!"
+                    }
                 }
-
             }catch (io: Exception){
                 Toast.makeText(this, "ERROR", Toast.LENGTH_LONG).show()
             }
         }
+    }
+    fun Join(tiempo:Int){
+        hilo1.join(tiempo.toLong())
+        hilo2.join(tiempo.toLong())
     }
 }
 
@@ -62,8 +48,9 @@ class HiloJugador1(p: MainActivity): Thread(){
     val puntero = p
     var dado1 = 0
     var dado2 = 0
-    var partida = true
-    var pausa = false
+    var jugando = true
+    var contador = 0
+    var r1 = 0
 
     fun tiro1() {
         dado1 = (1..6).random()
@@ -76,9 +63,23 @@ class HiloJugador1(p: MainActivity): Thread(){
 
     override fun run() {
         super.run()
-        puntero.runOnUiThread {
+        while (jugando){
+            puntero.runOnUiThread {
+                puntero.textView6.text = "Contador: ${contador}"
+                if (contador == 1) {
+                    tiro1()
+                }
+                if (contador == 3) {
+                    tiro2()
+                }
+                if (contador == 5) {
+                    jugando = false
+                }
+            }
+            contador++
+            sleep(1000)
         }
-        sleep(1000)
+        r1 = dado1 + dado2
     }
 }
 
@@ -86,8 +87,9 @@ class HiloJugador2(p: MainActivity): Thread(){
     val puntero = p
     var dado1 = 0
     var dado2 = 0
-    var partida = false
-    var pausa = true
+    var jugando = true
+    var contador = 0
+    var r2 = 0
 
     fun tiro1() {
         dado1 = (1..6).random()
@@ -100,8 +102,22 @@ class HiloJugador2(p: MainActivity): Thread(){
 
     override fun run() {
         super.run()
-        puntero.runOnUiThread {
+        while (jugando){
+            puntero.runOnUiThread {
+                puntero.textView7.text = "Contador: ${contador}"
+                if (contador == 2) {
+                    tiro1()
+                }
+                if (contador == 4) {
+                    tiro2()
+                }
+                if (contador == 5) {
+                    jugando = false
+                }
+            }
+            contador++
+            sleep(1000)
         }
-        sleep(1000)
+        r2 = dado1 + dado2
     }
 }
