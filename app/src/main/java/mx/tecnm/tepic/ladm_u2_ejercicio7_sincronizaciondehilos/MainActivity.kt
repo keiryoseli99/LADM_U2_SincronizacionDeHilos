@@ -2,7 +2,7 @@ package mx.tecnm.tepic.ladm_u2_ejercicio7_sincronizaciondehilos
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.CountDownTimer
+import android.view.View
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 import java.lang.Exception
@@ -15,32 +15,39 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        var start = true
+
         button.setOnClickListener {
+            button.visibility = View.INVISIBLE
             try {
                 hilo1.start()
                 hilo2.start()
-
                 Join(1)
-
-                if (hilo1.jugando == false) {
-                    if (hilo1.r1>hilo2.r2){
-                        textView5.text = "EL GANADOR ES: Juegador1"
-                    }
-                    if (hilo1.r1<hilo2.r2){
-                        textView5.text = "EL GANADOR ES: Juegador2"
-                    }
-                    if (hilo1.r1==hilo2.r2){
-                        textView5.text = "EMPATE!!!"
-                    }
-                }
+                fin()
             }catch (io: Exception){
                 Toast.makeText(this, "ERROR", Toast.LENGTH_LONG).show()
             }
+
         }
+
     }
     fun Join(tiempo:Int){
         hilo1.join(tiempo.toLong())
         hilo2.join(tiempo.toLong())
+    }
+    fun fin(){
+        if (hilo1.jugando == false && hilo2.jugando == false) {
+            if (hilo1.r1>hilo2.r2){
+                textView5.text = "EL GANADOR ES: Juegador1"
+            }
+            if (hilo1.r1<hilo2.r2){
+                textView5.text = "EL GANADOR ES: Juegador2"
+            }
+            if (hilo1.r1==hilo2.r2){
+                textView5.text = "EMPATE!!!"
+            }
+            button.visibility = View.VISIBLE
+        }
     }
 }
 
